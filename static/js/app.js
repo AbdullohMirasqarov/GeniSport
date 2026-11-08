@@ -170,6 +170,7 @@ const Router = {
       $(`view-${v}`).hidden = v !== name;
     }
     Router.current = name;
+    MobileNav.sync(name);
     $("topnav").style.display = name === "auth" ? "none" : "flex";
   },
 
@@ -1617,6 +1618,7 @@ const App = {
   },
 
   renderUserbox() {
+    MobileNav.updateProfile();
     const box = $("userbox");
     if (!App.user) {
       box.innerHTML = "";
@@ -1710,6 +1712,7 @@ const App = {
       } catch (err) { toast(err.message, true); }
       finally { button.disabled = false; }
     };
+    MobileNav.init();
     App.setupInstall();
     $("history-prev").onclick = () => Views.loadStats(Math.max(0, Views.offset - 10));
     $("history-next").onclick = () => Views.loadStats(Views.offset + 10);

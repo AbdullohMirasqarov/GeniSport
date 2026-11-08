@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>GeniSport — Training Arena</title>
   <meta name="description" content="Local-first exercise tracker powered by MediaPipe Pose. Camera never leaves your device." />
   <meta name="theme-color" content="#0a0e14" />
@@ -451,6 +451,25 @@
     <span>GeniSport · local-first AI fitness · <span class="muted">video never leaves your device</span></span>
   </footer>
 
+<nav class="mobile-tabs" id="mobile-tabs" aria-label="Main navigation" hidden>
+  <div class="mobile-tab-indicator" aria-hidden="true"></div>
+  <a href="#/train" data-mobile-route="train" class="mobile-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6.5 6.5 11 11M4 3 3 4l2 2-2 2 5 5 2-2 3 3-2 2 5 5 2-2 2 2 1-1M6 3l3 3M15 18l3 3"/></svg><span>Train</span></a>
+  <a href="#/battle" data-mobile-route="battle" class="mobile-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 4 6-1-1 6L7 21l-4-4L15 5M4 3l5 5M3 4l3-1M16 15l5 5M18 21l3-3"/></svg><span>Battle</span></a>
+  <a href="#/stats" data-mobile-route="stats" class="mobile-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V12h4v8M10 20V4h4v16M16 20V8h4v12"/></svg><span>My Stats</span></a>
+  <a href="#/leaderboard" data-mobile-route="leaderboard" class="mobile-tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v5a4 4 0 0 1-8 0V3ZM8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 12v5M8 21v-4h8v4H8Z"/></svg><span>Ranks</span></a>
+  <button type="button" class="mobile-tab" id="mobile-profile" aria-label="Open profile" aria-haspopup="dialog" aria-controls="mobile-account" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span>Profile</span></button>
+</nav>
+<dialog class="mobile-account" id="mobile-account" aria-labelledby="mobile-account-title">
+  <div class="mobile-sheet-handle" aria-hidden="true"></div>
+  <div class="mobile-sheet-heading"><h2 id="mobile-account-title">Your profile</h2><button type="button" class="mobile-sheet-close" id="mobile-account-close" aria-label="Close profile">×</button></div>
+  <div class="mobile-identity"><span class="mobile-avatar" id="mobile-avatar"></span><div><strong id="mobile-username"></strong><p>Ready for your next session?</p></div></div>
+  <form id="mobile-weight-form">
+    <label class="field" for="mobile-weight"><span>Body weight <small class="muted">· for calorie estimates</small></span><div class="mobile-weight-row"><input id="mobile-weight" type="number" min="25" max="300" step="0.5" required inputmode="decimal"/><span>kg</span><button type="submit" class="btn primary" id="mobile-weight-save">Save</button></div></label>
+  </form>
+  <p id="mobile-profile-message" class="mobile-profile-message" role="status" aria-live="polite"></p>
+  <button type="button" class="mobile-signout" id="mobile-signout">Sign out <span aria-hidden="true">↗</span></button>
+</dialog>
+
   <!-- Toast notifications -->
   <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 
@@ -460,6 +479,7 @@
   <!-- App modules (plain scripts, ES6+) -->
   <script src="/static/js/camera.js"></script>
   <script src="/static/js/pose.js"></script>
+  <script src="/static/js/mobile-nav.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>

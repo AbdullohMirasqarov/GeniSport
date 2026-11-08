@@ -1,12 +1,13 @@
 "use strict";
 
-const CACHE_NAME = "genisport-v5";
+const CACHE_NAME = "genisport-v6";
 const SHELL = [
   "/",
   "/static/css/style.css",
   "/static/js/camera.js",
   "/static/js/pose.js",
   "/static/js/app.js",
+  "/static/js/mobile-nav.js",
   "/static/vendor/pose/pose.js",
   "/static/icons/gs-logo.png",
   "/static/icons/gs-192.png",
