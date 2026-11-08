@@ -60,7 +60,7 @@ body {
 }
 
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
-.brand-icon { font-size: 1.5rem; }
+.brand-icon { display: block; width: 48px; height: 48px; object-fit: contain; flex-shrink: 0; }
 .brand-name { font-weight: 700; font-size: 1.15rem; letter-spacing: .3px; }
 .brand-name .accent { color: var(--accent); }
 

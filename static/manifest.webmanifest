@@ -1,6 +1,6 @@
 {
   "id": "/",
-  "name": "GeniSport — Train & Compete",
+  "name": "GeniSport \u2014 Train & Compete",
   "short_name": "GeniSport",
   "description": "Track your workouts with private, on-device camera pose detection.",
   "start_url": "/",
@@ -16,39 +16,27 @@
   ],
   "icons": [
     {
-      "src": "/static/icons/genisport-192.png",
+      "src": "/static/icons/gs-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/static/icons/genisport-512.png",
+      "src": "/static/icons/gs-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/static/icons/maskable-192.png",
+      "src": "/static/icons/gs-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/static/icons/maskable-512.png",
+      "src": "/static/icons/gs-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/static/icons/genisport.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/static/icons/maskable.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ]

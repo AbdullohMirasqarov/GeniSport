@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "genisport-v4";
+const CACHE_NAME = "genisport-v5";
 const SHELL = [
   "/",
   "/static/css/style.css",
@@ -8,12 +8,14 @@ const SHELL = [
   "/static/js/pose.js",
   "/static/js/app.js",
   "/static/vendor/pose/pose.js",
-  "/static/icons/genisport.svg",
-  "/static/icons/genisport-192.png",
-  "/static/icons/genisport-512.png",
-  "/static/icons/maskable-192.png",
-  "/static/icons/maskable-512.png",
-  "/static/icons/maskable.svg",
+  "/static/icons/gs-logo.png",
+  "/static/icons/gs-192.png",
+  "/static/icons/gs-512.png",
+  "/static/icons/gs-maskable-192.png",
+  "/static/icons/gs-maskable-512.png",
+  "/static/icons/gs-apple-180.png",
+  "/static/icons/gs-favicon-32.png",
+  "/static/icons/gs-favicon-48.png",
   "/manifest.webmanifest"
 ];
 
