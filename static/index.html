@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeniSport — Training Arena</title>
+  <meta name="description" content="Local-first exercise tracker powered by MediaPipe Pose. Camera never leaves your device." />
+  <meta name="theme-color" content="#0a0e14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GeniSport" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/static/icons/genisport-192.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- ======= HEADER ======= -->
+  <header class="topbar">
+    <a class="brand" href="#/" data-nav>
+      <span class="brand-icon">💪</span>
+      <span class="brand-name">Geni<span class="accent">Sport</span></span>
+    </a>
+    <nav class="topnav" id="topnav">
+      <a href="#/train" data-nav data-route="train">Train</a>
+      <a href="#/battle" data-nav data-route="battle">Battle</a>
+      <a href="#/stats" data-nav data-route="stats">My Stats</a>
+      <a href="#/leaderboard" data-nav data-route="leaderboard">Leaderboard</a>
+    </nav>
+    <div class="userbox" id="userbox">
+      <!-- filled by app.js -->
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- ======= AUTH VIEW ======= -->
+    <section class="view" id="view-auth" hidden>
+      <div class="auth-wrap">
+        <div class="auth-card">
+          <h1 id="auth-title">Welcome to GeniSport</h1>
+          <p class="auth-sub">Train with your camera, track your progress, or challenge a friend.</p>
+
+          <div class="tabs" role="tablist">
+            <button class="tab active" id="tab-login" role="tab">Sign in</button>
+            <button class="tab" id="tab-register" role="tab">Create account</button>
+          </div>
+
+          <form id="auth-form" autocomplete="on" novalidate>
+            <label class="field">
+              <span>Username</span>
+              <input type="text" id="auth-username" name="username" minlength="3" maxlength="64"
+                     pattern="[A-Za-z0-9_.\-]+" placeholder="e.g. athlete_01" required />
+            </label>
+            <label class="field">
+              <span>Password</span>
+              <input type="password" id="auth-password" name="password" minlength="6" maxlength="128"
+                     placeholder="min. 6 characters" required />
+            </label>
+            <label class="field" id="field-weight" hidden>
+              <span>Body weight (kg) <small class="muted">— for calorie math</small></span>
+              <input type="number" id="auth-weight" name="weight" min="25" max="300" step="0.5" value="70" />
+            </label>
+
+            <p class="form-error" id="auth-error" hidden></p>
+
+            <button type="submit" class="btn primary block" id="auth-submit">Sign in</button>
+          </form>
+
+          <p class="privacy-note">🔒 Your camera feed never leaves this device. Video is processed locally
+            with MediaPipe Pose; only rep counts are sent to the server.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= TRAIN VIEW ======= -->
+    <section class="view" id="view-train" hidden>
+
+      <!-- --- Sub-view 1: Exercise selection --- -->
+      <div id="exercise-select">
+        <h2 class="view-title">Choose your exercise</h2>
+        <p class="muted" style="margin-top:-12px">Pick a workout to start the AI coach.</p>
+
+        <div class="ex-grid">
+          <!-- Push-ups: ACTIVE -->
+          <div class="card ex-card active" id="ex-card-push_ups">
+            <div class="ex-icon">💪</div>
+            <h3 class="ex-name">Push-ups</h3>
+            <p class="ex-desc muted">AI counts your reps via camera — elbow-angle tracking with on-device pose detection.</p>
+            <div class="ex-meta muted tiny">
+              <span>MET 8.0</span> · <span>Calories estimated</span> · <span>Camera required</span>
+            </div>
+            <button class="btn primary block ex-start" data-exercise="push_ups">Start Workout</button>
+          </div>
+
+          <div class="card ex-card active">
+            <div class="ex-icon">🦵</div>
+            <h3 class="ex-name">Squats</h3>
+            <p class="ex-desc muted">Face sideways with your hips, knees and ankles in frame.</p>
+            <div class="ex-meta muted tiny"><span>MET 5.5</span></div>
+            <button class="btn primary block ex-start" data-exercise="squats">Start Workout</button>
+          </div>
+
+          <div class="card ex-card active">
+            <div class="ex-icon">🧗</div>
+            <h3 class="ex-name">Pull-ups</h3>
+            <p class="ex-desc muted">Keep your shoulders, elbows and hands visible throughout each pull.</p>
+            <div class="ex-meta muted tiny"><span>MET 8.0</span></div>
+            <button class="btn primary block ex-start" data-exercise="pull_ups">Start Workout</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- --- Sub-view 2: Active session --- -->
+      <div id="session-view" hidden>
+        <div class="session-header">
+          <button class="btn ghost small" id="btn-back-exercises">← Exercises</button>
+          <span class="session-ex-chip" id="session-ex-name">💪 Push-ups</span>
+        </div>
+
+        <div class="train-grid">
+        <!-- LEFT: video + overlay -->
+        <div class="video-panel card">
+          <div class="video-toolbar">
+            <label class="field inline">
+              <span>Camera</span>
+              <select id="camera-select"></select>
+            </label>
+            <button class="btn ghost small" id="btn-refresh-cams" title="Rescan devices">⟳ Rescan</button>
+            <button class="btn ghost small" id="btn-sound" title="Sound on/off (rep beeps + countdown)">🔊</button>
+            <span class="privacy-chip" title="Video is processed on-device">🔒 On-device AI</span>
+          </div>
+
+          <div class="video-stage" id="video-stage">
+            <video id="video" playsinline autoplay muted></video>
+            <canvas id="canvas"></canvas>
+
+            <div class="phase-badge" id="phase-badge">READY</div>
+
+            <div class="pose-hint" id="pose-hint" hidden>
+              <span class="pose-hint-icon" id="pose-hint-icon">🧍</span>
+              <span class="pose-hint-text" id="pose-hint-text">Stand in plank position</span>
+            </div>
+
+            <div class="countdown" id="countdown" hidden title="Click to skip">
+              <div class="countdown-num" id="countdown-num">3</div>
+              <div class="countdown-sub">Get into position — counting starts after the countdown</div>
+              <button class="btn ghost small countdown-skip" id="btn-skip-countdown">Skip ›</button>
+            </div>
+
+            <div class="video-overlay" id="video-overlay">
+              <div class="overlay-icon">🎥</div>
+              <p>Allow camera access, pick a device and press <strong>Start</strong>.</p>
+              <p class="hint" id="overlay-hint">Tip: place the camera at ~45° from the side so your whole upper body is visible.</p>
+            </div>
+
+            <div class="cam-error" role="alert" id="cam-error" hidden></div>
+          </div>
+
+          <div class="video-controls">
+            <button class="btn primary" id="btn-start">▶ Start camera</button>
+            <button class="btn danger" id="btn-stop" disabled>■ Stop</button>
+            <button class="btn ghost" id="btn-reset" disabled>↺ Reset reps</button>
+            <span class="pose-conf" id="pose-conf" title="Average pose visibility confidence">Pose: —</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: live metrics -->
+        <aside class="metrics-panel">
+          <div class="card metric-hero">
+            <span class="metric-label">Reps</span>
+            <span class="metric-value" id="metric-reps">0</span>
+            <span class="metric-sub muted" id="metric-target-hint">no target</span>
+          </div>
+
+          <div class="card metric">
+            <span class="metric-label">⏱ Time</span>
+            <span class="metric-value" id="metric-time">0:00</span>
+          </div>
+
+          <div class="card metric">
+            <span class="metric-label">🔥 Calories</span>
+            <span class="metric-value" id="metric-calories">0.0</span>
+            <span class="metric-sub muted">estimated kcal</span>
+          </div>
+
+          <div class="card metric">
+            <span class="metric-label">📍 Phase</span>
+            <span class="metric-value small" id="metric-phase">—</span>
+          </div>
+
+          <div class="card session-actions">
+            <label class="field">
+              <span>Target reps <small class="muted">(optional)</small></span>
+              <input type="number" id="target-reps" min="1" max="1000" placeholder="e.g. 20" />
+            </label>
+            <button class="btn primary block" id="btn-save" disabled>💾 Save workout</button>
+            <p class="muted tiny center" id="save-note">Finish a session to enable saving.</p>
+          </div>
+        </aside>
+        </div><!-- /train-grid -->
+      </div><!-- /session-view -->
+    </section>
+
+    <!-- ======= BATTLE VIEW ======= -->
+    <section class="view" id="view-battle" hidden>
+
+      <!-- --- Sub-view 1: Battle hub --- -->
+      <div id="battle-hub">
+        <h2 class="view-title">⚔️ Battle Arena</h2>
+        <p class="muted battle-hub-sub">Challenge a friend to a live 1v1 duel — both AI coaches run 100% on-device.</p>
+
+        <div class="battle-hub-grid">
+          <div class="card battle-card">
+            <h3 class="section-title">🔥 Create battle</h3>
+
+            <span class="field-label">Exercise</span>
+            <div class="battle-chip-row">
+              <button type="button" class="battle-chip active" data-exercise="push_ups">💪 Push-ups</button>
+              <button type="button" class="battle-chip" data-exercise="squats">🦵 Squats</button>
+              <button type="button" class="battle-chip" data-exercise="pull_ups">🧗 Pull-ups</button>
+            </div>
+
+            <span class="field-label">Mode</span>
+            <div class="battle-mode-toggle">
+              <button type="button" class="battle-mode active" data-mode="time_attack">⏱ Time Attack</button>
+              <button type="button" class="battle-mode" data-mode="first_to_target">🎯 Target Race</button>
+            </div>
+
+            <span class="field-label" id="battle-option-label">Duration</span>
+            <div class="battle-chip-row" id="battle-options">
+              <!-- filled by app.js: 30s/60s/120s or 20/50/100 reps -->
+            </div>
+
+            <button type="button" class="btn primary block battle-create-btn" id="btn-battle-create">⚔️ Generate Room</button>
+          </div>
+
+          <div class="card battle-card">
+            <h3 class="section-title">🚪 Join battle</h3>
+            <p class="muted tiny battle-join-hint">Got a code from a friend? Jump straight into their room.</p>
+            <label class="field">
+              <span>Room code</span>
+              <input type="text" id="battle-join-code" placeholder="GS-7482" maxlength="10"
+                     autocomplete="off" spellcheck="false" />
+            </label>
+            <button type="button" class="btn primary block" id="btn-battle-join">Join Room →</button>
+            <div class="privacy-note battle-privacy-note">🔒 Both players' video streams stay in their own browsers —
+              the server only relays rep counts.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- --- Sub-view 2: Room lobby (waiting room) --- -->
+      <div id="battle-lobby" hidden>
+        <div class="card battle-lobby-card">
+          <div class="battle-roomcode-row">
+            <div>
+              <span class="muted tiny">Share this room code</span>
+              <div class="battle-roomcode" id="battle-code-display">GS-0000</div>
+            </div>
+            <div class="battle-copy-btns">
+              <button type="button" class="btn ghost small" id="btn-copy-code">📋 Copy code</button>
+              <button type="button" class="btn ghost small" id="btn-copy-link">🔗 Copy link</button>
+            </div>
+          </div>
+
+          <div class="battle-slots">
+            <div class="battle-slot" id="slot-host">
+              <div class="battle-slot-avatar" id="slot-host-avatar">?</div>
+              <div class="battle-slot-main">
+                <div class="battle-slot-name" id="slot-host-name">You</div>
+                <div class="battle-slot-sub muted">Host</div>
+              </div>
+              <button type="button" class="btn ghost battle-ready-btn" id="btn-battle-ready">✔ Ready</button>
+            </div>
+
+            <div class="battle-vs">VS</div>
+
+            <div class="battle-slot" id="slot-guest">
+              <div class="battle-slot-avatar empty" id="slot-guest-avatar">?</div>
+              <div class="battle-slot-main">
+                <div class="battle-slot-name" id="slot-guest-name">Waiting for opponent…</div>
+                <div class="battle-slot-sub muted">Guest</div>
+              </div>
+              <span class="battle-slot-status muted tiny" id="slot-guest-status"></span>
+            </div>
+          </div>
+
+          <div class="battle-config-line muted tiny" id="battle-config-line">💪 Push-ups · Time Attack · 60s</div>
+          <button type="button" class="btn ghost block" id="btn-battle-leave-lobby">← Leave room</button>
+        </div>
+      </div>
+
+      <!-- --- Sub-view 3: Live battle arena --- -->
+      <div id="battle-arena" hidden>
+        <div class="battle-arena-head">
+          <button type="button" class="btn danger small" id="btn-battle-forfeit" title="Leave the match — opponent wins">🏳 Forfeit</button>
+          <div class="battle-banner">
+            <div class="battle-banner-main" id="battle-banner-main">0:00</div>
+            <div class="battle-banner-sub muted" id="battle-banner-sub">Time Attack</div>
+          </div>
+          <span class="privacy-chip">🔒 On-device AI</span>
+        </div>
+
+        <div class="battle-arena-grid">
+          <!-- Your stage: real camera + skeleton canvas -->
+          <div class="card battle-stage-card">
+            <div class="battle-stage-label you">YOU</div>
+            <div class="video-stage battle-stage">
+              <video id="bvideo" playsinline autoplay muted></video>
+              <canvas id="bcanvas"></canvas>
+              <div class="phase-badge" id="battle-my-phase">READY</div>
+              <div class="battle-countdown" id="battle-countdown" hidden>
+                <div class="countdown-num" id="battle-countdown-num">3</div>
+                <div class="countdown-sub">Get into position!</div>
+              </div>
+              <div class="video-overlay" id="battle-overlay">
+                <div class="overlay-icon">🥊</div>
+                <p>Waiting for the match to start…</p>
+              </div>
+              <div class="cam-error" id="battle-cam-error" hidden></div>
+            </div>
+            <div class="battle-reps-row my">
+              <span class="battle-reps-num" id="battle-my-reps">0</span>
+              <span class="battle-reps-label muted">reps</span>
+            </div>
+            <div class="battle-progress"><div class="battle-progress-fill my" id="battle-my-progress"></div></div>
+          </div>
+
+          <!-- Opponent stage: live mirrored stats -->
+          <div class="card battle-stage-card opponent">
+            <div class="battle-stage-label opp">OPPONENT</div>
+            <div class="battle-opp-avatar" id="battle-opp-avatar">?</div>
+            <div class="battle-opp-name" id="battle-opp-name">Opponent</div>
+            <div class="battle-reps-row opp">
+              <span class="battle-reps-num" id="battle-opp-reps">0</span>
+              <span class="battle-reps-label muted">reps</span>
+            </div>
+            <div class="battle-progress"><div class="battle-progress-fill opp" id="battle-opp-progress"></div></div>
+            <div class="battle-opp-phase-wrap">
+              <span class="battle-opp-phase-title muted tiny">Live phase</span>
+              <div class="phase-badge" id="battle-opp-phase">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- --- Sub-view 4: Victory / Game-over modal --- -->
+      <div class="modal-backdrop" id="battle-result-modal" hidden>
+        <div class="modal-card battle-result">
+          <div class="battle-result-banner victory" id="battle-result-banner">🏆 VICTORY!</div>
+          <div class="battle-result-compare">
+            <div class="battle-result-side">
+              <div class="battle-result-username" id="battle-result-me-name">You</div>
+              <div class="battle-result-reps" id="battle-result-my-reps">0</div>
+              <div class="muted tiny">reps</div>
+            </div>
+            <div class="battle-result-vs">VS</div>
+            <div class="battle-result-side">
+              <div class="battle-result-username" id="battle-result-opp-name">Opponent</div>
+              <div class="battle-result-reps" id="battle-result-opp-reps">0</div>
+              <div class="muted tiny">reps</div>
+            </div>
+          </div>
+          <div class="battle-result-sub muted" id="battle-result-sub"></div>
+          <div class="battle-result-actions">
+            <button type="button" class="btn ghost" id="btn-battle-to-hub">Return to Hub</button>
+            <button type="button" class="btn primary" id="btn-battle-rematch">🔁 Rematch</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= STATS VIEW ======= -->
+    <section class="view" id="view-stats" hidden>
+      <h2 class="view-title">My Stats</h2>
+      <div class="stats-grid">
+        <div class="card stat-card">
+          <span class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"/><path d="M21 21l-1-1"/><path d="M3 3l1 1"/><path d="M18 22l4-4"/><path d="M2 6l4-4"/><path d="M3 10l7-7"/><path d="M14 21l7-7"/><rect x="14" y="14" width="0" height="0"/><path d="M17 4l3 3"/></svg>
+          </span>
+          <span class="stat-info"><span class="metric-label">Total reps</span><span class="metric-value" id="stat-reps">0</span></span>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <span class="stat-info"><span class="metric-label">Sessions</span><span class="metric-value" id="stat-sessions">0</span></span>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-icon violet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </span>
+          <span class="stat-info"><span class="metric-label">Total time</span><span class="metric-value" id="stat-time">0:00</span></span>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          </span>
+          <span class="stat-info"><span class="metric-label">Calories burned</span><span class="metric-value" id="stat-calories">0</span></span>
+        </div>
+      </div>
+
+      <h3 class="section-title">Last 7 days <small>· reps per day, UTC</small></h3>
+      <div class="card week-chart" id="week-chart"></div>
+      <h3 class="section-title">Personal records</h3>
+      <div class="records" id="records"></div>
+      <div class="history-heading">
+        <h3 class="section-title">Workout history</h3>
+        <button class="btn ghost small" id="export-csv">Download CSV</button>
+      </div>
+      <div class="card table-card">
+        <table class="table" id="history-table">
+          <thead>
+            <tr><th>#</th><th>Exercise</th><th>Reps</th><th>Duration</th><th>Calories</th><th>When</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="muted center pad" id="history-empty" hidden>No workouts yet — go do your first session! 💪</p>
+      </div>
+      <div class="history-nav">
+        <button class="btn ghost small" id="history-prev">Previous</button>
+        <span id="history-page" aria-live="polite"></span>
+        <button class="btn ghost small" id="history-next">Next</button>
+      </div>
+      <h3 class="section-title">Recent battles</h3>
+      <div class="card" id="match-history"></div>
+    </section>
+
+    <!-- ======= LEADERBOARD VIEW ======= -->
+    <section class="view" id="view-leaderboard" hidden>
+      <h2 class="view-title">Leaderboard</h2>
+      <div class="lb-grid">
+        <div class="card">
+          <h3 class="section-title">🏆 All-time top</h3>
+          <ol class="lb-list" id="lb-alltime"></ol>
+          <p class="muted center pad" id="lb-alltime-empty" hidden>No data yet.</p>
+        </div>
+        <div class="card">
+          <h3 class="section-title">📅 Today</h3>
+          <ol class="lb-list" id="lb-daily"></ol>
+          <p class="muted center pad" id="lb-daily-empty" hidden>No workouts recorded today yet.</p>
+        </div>
+      </div>
+      <p class="muted tiny center" style="margin-top:14px">Ranking by total reps across all exercises · per-exercise badges shown per user</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>GeniSport · local-first AI fitness · <span class="muted">video never leaves your device</span></span>
+  </footer>
+
+  <!-- Toast notifications -->
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+  <!-- MediaPipe Pose (CDN) -->
+  <script src="/static/vendor/pose/pose.js" crossorigin="anonymous"></script>
+
+  <!-- App modules (plain scripts, ES6+) -->
+  <script src="/static/js/camera.js"></script>
+  <script src="/static/js/pose.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
