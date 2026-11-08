@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "genisport-v3";
+const CACHE_NAME = "genisport-v4";
 const SHELL = [
   "/",
   "/static/css/style.css",

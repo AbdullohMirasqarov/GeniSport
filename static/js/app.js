@@ -1574,9 +1574,10 @@ const App = {
 
   setupInstall() {
     const button = $("btn-install");
+    if (!button) return;
     const isApp = window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true;
-    button.hidden = isApp;
+    button.hidden = true;
     if (isApp) return;
     window.addEventListener("beforeinstallprompt", event => {
       event.preventDefault();
